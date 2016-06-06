@@ -1,0 +1,63 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:jaxws="http://cxf.apache.org/jaxws" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+	http://cxf.apache.org/jaxws
+	http://cxf.apache.org/schemas/jaxws.xsd
+	http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.0.xsd">
+
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<value>classpath:ctp_bootstrap.properties</value>
+		</property>
+	</bean>
+
+	<bean id="jndiTemplate" class="org.springframework.jndi.JndiTemplate">
+		<property name="environment">
+			<props>
+				<prop key="java.naming.provider.url">${jms.provider.url}</prop>
+				<prop key="java.naming.factory.initial">${ctp.default.jndi.factory}</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- Use Weblogic JMS -->
+	<bean id="gt3.jmsFactory" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="${jms.factory.jndi.name}" />
+		<property name="jndiTemplate">
+			<ref bean="jndiTemplate" />
+		</property>
+	</bean>
+
+
+	<bean id="gt3.queue.task" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="${jms.query.jndi.name}" />
+		<property name="jndiTemplate">
+			<ref bean="jndiTemplate" />
+		</property>
+	</bean>
+
+	<!-- JmsTemplate -->
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate102">
+		<property name="pubSubDomain" value="false" />
+		<property name="connectionFactory" ref="gt3.jmsFactory" />
+		<property name="defaultDestination" ref="gt3.queue.task" />
+	</bean>
+
+	<bean id="QueueReceiveSpring" class="gov.jslt.taxweb.jms.QueueReceiveSpring">
+		
+	</bean>
+
+	<bean id="batchReceiverQueueListenerContainer"
+		class="org.springframework.jms.listener.DefaultMessageListenerContainer102"  lazy-init="false">
+		<property name="concurrentConsumers" value="100" />
+		<property name="maxConcurrentConsumers" value="500"></property>
+		<property name="connectionFactory" ref="gt3.jmsFactory" />
+		<property name="destination" ref="gt3.queue.task" />
+		<property name="messageListener" ref="QueueReceiveSpring" />
+	</bean>
+
+
+</beans>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="GB2312"?>
+<bizLogicHandler-config>
+	<bizLogicHandler>
+		<bizLogicHandler-name>JMSBLH</bizLogicHandler-name>
+		<bizLogicHandler-class>
+			gov.jslt.taxcore.taxblh.jms.JMSBLH
+		</bizLogicHandler-class>
+		<dataSource-name>ctpds</dataSource-name>
+	</bizLogicHandler>
+	<bizLogicHandler>
+		<bizLogicHandler-name>Nsrd001BLH</bizLogicHandler-name>
+		<bizLogicHandler-class>
+			gov.jslt.taxcore.taxblh.nsrd.nsrd001.Nsrd001BLH
+		</bizLogicHandler-class>
+		<dataSource-name>ctpds</dataSource-name>
+	</bizLogicHandler>
+
+</bizLogicHandler-config>
