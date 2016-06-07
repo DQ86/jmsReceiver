@@ -12,6 +12,7 @@ import sun.jdbc.rowset.CachedRowSet;
 
 import com.ctp.core.blh.BaseBizLogicHandler;
 import com.ctp.core.bpo.QueryBPO;
+import com.ctp.core.commutils.StringUtils;
 import com.ctp.core.event.RequestEvent;
 import com.ctp.core.event.ResponseEvent;
 import com.ctp.core.exception.TaxBaseBizException;
@@ -42,7 +43,8 @@ public class Nsrd001BLH extends BaseBizLogicHandler {
 			jbXxMap.put("djzclxMc", rs.getString("DJZCLX_MC"));
 			jbXxMap.put("gbhyMc", rs.getString("GBHY_MC"));
 			jbXxMap.put("zcDz", rs.getString("ZCDZ"));
-			jbXxMap.put("xyDj", rs.getString("XYDJ"));
+			jbXxMap.put("xyDj",
+					StringUtils.stringNullRep(rs.getString("XYDJ"), ""));
 		}
 		resMap.put("jbXx", jbXxMap);
 		// 税费记录
