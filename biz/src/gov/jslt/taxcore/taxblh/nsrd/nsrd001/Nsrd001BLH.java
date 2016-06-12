@@ -1,5 +1,9 @@
 package gov.jslt.taxcore.taxblh.nsrd.nsrd001;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -16,6 +20,7 @@ import com.ctp.core.commutils.StringUtils;
 import com.ctp.core.event.RequestEvent;
 import com.ctp.core.event.ResponseEvent;
 import com.ctp.core.exception.TaxBaseBizException;
+import com.ctp.core.log.LogWritter;
 
 public class Nsrd001BLH extends BaseBizLogicHandler {
 
@@ -49,9 +54,23 @@ public class Nsrd001BLH extends BaseBizLogicHandler {
 		resMap.put("jbXx", jbXxMap);
 		// 税费记录
 		List<Map<String, String>> sFXxList = new ArrayList<Map<String, String>>();
-		sql = "SELECT B.SWGLM,B.NSRSBM,B.NSR_MC,TO_CHAR(T.SFSSQ_QSRQ, 'YYYY') SSND,T.ZSXM_DM SZ,SUM(T.SJ_JE) RKSE FROM T_ZS_JKMX T, T_DJ_JGNSR B"
-				+ " WHERE T.SWGLM = B.SWGLM AND T.RK_RQ IS NOT NULL AND T.SFSSQ_QSRQ BETWEEN ADD_MONTHS(TRUNC(SYSDATE, 'YYYY'), -24) AND SYSDATE"
-				+ " AND T.SWGLM = ? GROUP BY TO_CHAR(T.SFSSQ_QSRQ, 'YYYY'),B.SWGLM,B.NSRSBM,B.NSR_MC,T.ZSXM_DM ORDER BY TO_CHAR(T.SFSSQ_QSRQ, 'YYYY'), T.ZSXM_DM";
+		sql = "SELECT B.SWGLM,\n"
+				+ "       B.NSRSBM,\n"
+				+ "       B.NSR_MC,\n"
+				+ "       TO_CHAR(T.SFSSQ_QSRQ, 'YYYY') SSND,\n"
+				+ "       C.MC_J SZ,\n"
+				+ "       SUM(T.SJ_JE) RKSE\n"
+				+ "  FROM T_ZS_JKMX T, T_DJ_JGNSR B, T_DM_GY_ZSXM C\n"
+				+ " WHERE T.SWGLM = B.SWGLM\n"
+				+ "   AND T.ZSXM_DM = C.ZSXM_DM\n"
+				+ "   AND T.RK_RQ IS NOT NULL\n"
+				+ "   AND T.SFSSQ_QSRQ BETWEEN ADD_MONTHS(TRUNC(SYSDATE, 'YYYY'), -24) AND\n"
+				+ "       SYSDATE\n" + "   AND T.SWGLM = ?\n"
+				+ " GROUP BY TO_CHAR(T.SFSSQ_QSRQ, 'YYYY'),\n"
+				+ "          B.SWGLM,\n" + "          B.NSRSBM,\n"
+				+ "          B.NSR_MC,\n" + "          C.MC_J\n"
+				+ " ORDER BY TO_CHAR(T.SFSSQ_QSRQ, 'YYYY'), C.MC_J";
+
 		rs = QueryBPO.findAll(conn, sql, sqlParams);
 		while (rs.next()) {
 			tmpMap = new HashMap<String, String>();
@@ -66,9 +85,22 @@ public class Nsrd001BLH extends BaseBizLogicHandler {
 		resMap.put("sfXx", sFXxList);
 		// 社保费
 		List<Map<String, String>> sbfXxList = new ArrayList<Map<String, String>>();
-		sql = "SELECT B.SWGLM,B.NSRSBM,B.NSR_MC,TO_CHAR(T.SFSSQ_QSRQ, 'YYYY') SSND,T.SBZSPM_DM XZ,SUM(T.SJ_JE) SJJE FROM T_ZS_JKMXSBF T, T_DJ_JGNSR B"
-				+ " WHERE T.SWGLM = B.SWGLM AND T.RK_RQ IS NOT NULL AND T.SFSSQ_QSRQ BETWEEN ADD_MONTHS(TRUNC(SYSDATE, 'YYYY'), -24) AND SYSDATE "
-				+ " AND T.SWGLM = ? GROUP BY TO_CHAR(T.SFSSQ_QSRQ, 'YYYY'),B.SWGLM,B.NSRSBM,B.NSR_MC,T.SBZSPM_DM ORDER BY TO_CHAR(T.SFSSQ_QSRQ, 'YYYY'), T.SBZSPM_DM";
+		sql = "SELECT B.SWGLM,\n"
+				+ "       B.NSRSBM,\n"
+				+ "       B.NSR_MC,\n"
+				+ "       TO_CHAR(T.SFSSQ_QSRQ, 'YYYY') SSND,\n"
+				+ "       C.MC_J XZ,\n"
+				+ "       SUM(T.SJ_JE) SJJE\n"
+				+ "  FROM T_ZS_JKMXSBF T, T_DJ_JGNSR B, T_DM_GY_ZSXMSB C\n"
+				+ " WHERE T.SWGLM = B.SWGLM\n"
+				+ "   AND T.SBZSXM_DM = C.SBZSXM_DM\n"
+				+ "   AND T.RK_RQ IS NOT NULL\n"
+				+ "   AND T.SFSSQ_QSRQ BETWEEN ADD_MONTHS(TRUNC(SYSDATE, 'YYYY'), -24) AND\n"
+				+ "       SYSDATE\n" + "   AND T.SWGLM = ?\n"
+				+ " GROUP BY TO_CHAR(T.SFSSQ_QSRQ, 'YYYY'),\n"
+				+ "          B.SWGLM,\n" + "          B.NSRSBM,\n"
+				+ "          B.NSR_MC,\n" + "          C.MC_J\n"
+				+ " ORDER BY TO_CHAR(T.SFSSQ_QSRQ, 'YYYY'), C.MC_J";
 		rs = QueryBPO.findAll(conn, sql, sqlParams);
 		while (rs.next()) {
 			tmpMap = new HashMap<String, String>();
@@ -174,7 +206,7 @@ public class Nsrd001BLH extends BaseBizLogicHandler {
 			tmpMap.put("nsrSbm", rs.getString("NSRSBM"));
 			tmpMap.put("nsrMc", rs.getString("NSR_MC"));
 			tmpMap.put("cfjdWh", rs.getString("CFJDWH"));
-			tmpMap.put("cfSy", rs.getString("CFSY"));
+			tmpMap.put("cfSy", clobToString(rs.getClob("CFSY")));
 			tmpMap.put("cfRq", rs.getString("CFRQ"));
 			tmpMap.put("zswcRq", rs.getString("ZXWCRQ"));
 			tmpMap.put("cfJe", rs.getString("CFJE"));
@@ -185,6 +217,25 @@ public class Nsrd001BLH extends BaseBizLogicHandler {
 		resEvent.respMapParam.put("content", JSONSerializer.toJSON(resMap)
 				.toString());
 		return resEvent;
+	}
+
+	public String clobToString(Clob clob) throws SQLException {
+		if (null == clob) {
+			return "";
+		}
+		Reader is = clob.getCharacterStream();
+		BufferedReader br = new BufferedReader(is);
+		StringBuffer strBuf = new StringBuffer();
+		try {
+			String s = br.readLine();
+			while (s != null) {
+				strBuf.append(s);
+				s = br.readLine();
+			}
+		} catch (IOException e) {
+			LogWritter.sysError(e.getMessage());
+		}
+		return strBuf.toString();
 	}
 
 	@Override
