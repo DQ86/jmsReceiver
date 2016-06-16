@@ -91,9 +91,10 @@ public class Nsrd001BLH extends BaseBizLogicHandler {
 				+ "       TO_CHAR(T.SFSSQ_QSRQ, 'YYYY') SSND,\n"
 				+ "       C.MC_J XZ,\n"
 				+ "       SUM(T.SJ_JE) SJJE\n"
-				+ "  FROM T_ZS_JKMXSBF T, T_DJ_JGNSR B, T_DM_GY_ZSXMSB C\n"
+				+ "  FROM T_ZS_JKMXSBF T, T_DJ_JGNSR B, T_DM_GY_ZSPMSB C\n"
 				+ " WHERE T.SWGLM = B.SWGLM\n"
 				+ "   AND T.SBZSXM_DM = C.SBZSXM_DM\n"
+				+ "   AND T.SBZSPM_DM = C.SBZSPM_DM\n"
 				+ "   AND T.RK_RQ IS NOT NULL\n"
 				+ "   AND T.SFSSQ_QSRQ BETWEEN ADD_MONTHS(TRUNC(SYSDATE, 'YYYY'), -24) AND\n"
 				+ "       SYSDATE\n" + "   AND T.SWGLM = ?\n"
@@ -101,6 +102,7 @@ public class Nsrd001BLH extends BaseBizLogicHandler {
 				+ "          B.SWGLM,\n" + "          B.NSRSBM,\n"
 				+ "          B.NSR_MC,\n" + "          C.MC_J\n"
 				+ " ORDER BY TO_CHAR(T.SFSSQ_QSRQ, 'YYYY'), C.MC_J";
+
 		rs = QueryBPO.findAll(conn, sql, sqlParams);
 		while (rs.next()) {
 			tmpMap = new HashMap<String, String>();
